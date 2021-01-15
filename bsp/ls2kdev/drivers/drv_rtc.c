@@ -17,7 +17,10 @@
 #include <rtthread.h>
 #include "ls2k1000.h"
 
-struct loongson_rtc {
+#ifdef RT_USING_RTC
+
+struct loongson_rtc
+{
     rt_uint32_t sys_toytrim;
     rt_uint32_t sys_toywrite0;
     rt_uint32_t sys_toywrite1;
@@ -43,7 +46,8 @@ struct loongson_rtc {
 #define __BF(number, n, m)   __RBF((number>>m), (n-m+1))
 #define BF(number, n, m)     (m<n ? __BF(number, n, m) : __BF(number, m, n))
 
-struct rtctime {
+struct rtctime
+{
     rt_uint32_t sys_toyread0;
     rt_uint32_t sys_toyread1;
     rt_uint32_t sys_rtcread0;
@@ -104,7 +108,7 @@ static rt_err_t rt_rtc_open(rt_device_t dev, rt_uint16_t oflag)
     return RT_EOK;
 }
 
-static rt_size_t rt_rtc_read(rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size)
+static rt_size_t rt_rtc_read(rt_device_t dev, rt_off_t pos, void *buffer, rt_size_t size)
 {
     return 0;
 }
@@ -131,7 +135,8 @@ static rt_err_t rt_rtc_ioctl(rt_device_t dev, int cmd, void *args)
     rtctm.sys_rtcread0 = hw_rtc->sys_rtcread0;
     tmptime = *localrtctime(&rtctm);
 
-    switch (cmd) {
+    switch (cmd)
+    {
     case RT_DEVICE_CTRL_RTC_GET_TIME:
         *t = mktime(&tmptime);
         break;
@@ -162,7 +167,8 @@ static rt_err_t rt_rtc_ioctl(rt_device_t dev, int cmd, void *args)
 
 int rt_hw_rtc_init(void)
 {
-    static struct rt_device rtc = {
+    static struct rt_device rtc =
+    {
         .type      = RT_Device_Class_RTC,
         .init      = RT_NULL,
         .open      = rt_rtc_open,
@@ -176,3 +182,5 @@ int rt_hw_rtc_init(void)
 }
 
 INIT_DEVICE_EXPORT(rt_hw_rtc_init);
+
+#endif /*RT_USING_RTC*/
